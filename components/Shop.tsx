@@ -16,9 +16,11 @@ const Shop: React.FC<ShopProps> = ({ stars, ownedThemes, activeThemeId, onClose,
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/95 p-6 overflow-y-auto">
       <div className="w-full max-w-4xl">
-        <div className="flex justify-between items-center mb-12">
-          <h2 className="text-4xl md:text-6xl font-orbitron font-black text-white italic">DIMENSION SHOP</h2>
-          <div className="px-6 py-3 bg-[#ffd700] text-black font-black font-orbitron text-xl">STARS: {stars}</div>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 md:mb-12">
+          <h2 className="text-3xl md:text-6xl font-orbitron font-black text-white italic text-center md:text-left">DIMENSION SHOP</h2>
+          <div className="px-6 py-3 bg-[#ffd700] text-black font-black font-orbitron text-lg md:text-xl shadow-[0_0_20px_rgba(255,215,0,0.4)] whitespace-nowrap">
+            STARS: {stars}★
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -28,11 +30,11 @@ const Shop: React.FC<ShopProps> = ({ stars, ownedThemes, activeThemeId, onClose,
             const canAfford = stars >= theme.price;
 
             return (
-              <div 
+              <div
                 key={theme.id}
                 className={`p-6 border-2 transition-all ${isActive ? 'border-[#00f2ff] bg-white/5' : 'border-gray-800'}`}
               >
-                <div 
+                <div
                   className="w-full h-24 mb-4 flex items-center justify-center border border-gray-700 bg-black"
                   style={{ boxShadow: `inset 0 0 20px ${theme.glowColor}22` }}
                 >
@@ -40,18 +42,18 @@ const Shop: React.FC<ShopProps> = ({ stars, ownedThemes, activeThemeId, onClose,
                 </div>
                 <h3 className="text-xl font-orbitron font-bold text-white mb-2">{theme.name}</h3>
                 <p className="text-gray-500 text-xs mb-4 h-8">{theme.description}</p>
-                
+
                 {isActive ? (
                   <div className="w-full py-2 bg-[#00f2ff] text-black text-center font-bold font-orbitron text-sm">ACTIVE</div>
                 ) : isOwned ? (
-                  <button 
+                  <button
                     onClick={() => onSelect(theme.id)}
                     className="w-full py-2 border border-white text-white hover:bg-white hover:text-black transition-colors font-bold font-orbitron text-sm"
                   >
                     SELECT
                   </button>
                 ) : (
-                  <button 
+                  <button
                     disabled={!canAfford}
                     onClick={() => onPurchase(theme)}
                     className={`w-full py-2 font-bold font-orbitron text-sm ${canAfford ? 'bg-white text-black hover:bg-[#ffd700]' : 'bg-gray-800 text-gray-500'}`}
@@ -64,7 +66,7 @@ const Shop: React.FC<ShopProps> = ({ stars, ownedThemes, activeThemeId, onClose,
           })}
         </div>
 
-        <button 
+        <button
           onClick={onClose}
           className="mt-12 px-12 py-4 border-2 border-white text-white font-orbitron font-black hover:bg-white hover:text-black transition-all"
         >
