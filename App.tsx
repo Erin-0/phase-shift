@@ -101,6 +101,9 @@ const App: React.FC = () => {
   };
 
   const startGame = useCallback(() => {
+    // Prevent starting if any modal is open
+    if (showAuth || showLeaderboard || showMissions || gameState.status === GameStatus.SHOP) return;
+
     setGameState(prev => ({
       ...prev,
       status: GameStatus.PLAYING,
@@ -112,7 +115,7 @@ const App: React.FC = () => {
       activePowerUp: null,
       lastRunStars: 0
     }));
-  }, []);
+  }, [showAuth, showLeaderboard, showMissions, gameState.status]);
 
   const handleGameOver = useCallback((finalScore: number, collectedInRun: number) => {
     if (!userProfile) return;
@@ -170,6 +173,17 @@ const App: React.FC = () => {
         onTogglePhase={togglePhase}
       />
 
+      {/* Game HUD (Only while playing) */}
+      {gameState.status === GameStatus.PLAYING && (
+        <HUD score={gameState.score} highScore={gameState.highScore} phase={gameState.currentPhase} stars={gameState.stars} combo={gameState.combo} activePowerUp={gameState.activePowerUp} />
+      )}
+
+      {/* Main Menu (Only if not playing/gameover/shop) */}
+      {gameState.status === GameStatus.START && !showAuth && !showLeaderboard && !showMissions && (
+        <MainMenu highScore={gameState.highScore} stars={gameState.stars} username={userProfile?.username} onStart={startGame} onOpenShop={() => setGameState(p => ({ ...p, status: GameStatus.SHOP }))} onOpenLeaderboard={() => setShowLeaderboard(true)} onOpenMissions={() => setShowMissions(true)} />
+      )}
+
+      {/* Overlays / Modals (Highest Z-Index) */}
       {showAuth && <Auth onLogin={() => setShowAuth(false)} />}
       {showLeaderboard && <Leaderboard onClose={() => setShowLeaderboard(false)} />}
       {showMissions && userProfile && (
@@ -179,20 +193,18 @@ const App: React.FC = () => {
         }} />
       )}
 
-      {gameState.status === GameStatus.PLAYING && (
-        <HUD score={gameState.score} highScore={gameState.highScore} phase={gameState.currentPhase} stars={gameState.stars} combo={gameState.combo} activePowerUp={gameState.activePowerUp} />
-      )}
-
-      {gameState.status === GameStatus.START && !showAuth && (
-        <MainMenu highScore={gameState.highScore} stars={gameState.stars} username={userProfile?.username} onStart={startGame} onOpenShop={() => setGameState(p => ({ ...p, status: GameStatus.SHOP }))} onOpenLeaderboard={() => setShowLeaderboard(true)} onOpenMissions={() => setShowMissions(true)} />
-      )}
-
       {gameState.status === GameStatus.SHOP && userProfile && (
         <Shop stars={gameState.stars} ownedThemes={userProfile.ownedThemes} activeThemeId={userProfile.activeThemeId} onClose={() => setGameState(p => ({ ...p, status: GameStatus.START }))} onPurchase={(theme) => persistProfile({ stars: userProfile.stars - theme.price, ownedThemes: [...userProfile.ownedThemes, theme.id] })} onSelect={(id) => persistProfile({ activeThemeId: id })} />
       )}
 
       {gameState.status === GameStatus.GAMEOVER && (
-        <GameOver score={gameState.score} highScore={gameState.highScore} starsGained={gameState.lastRunStars} onRestart={startGame} />
+        <GameOver
+          score={gameState.score}
+          highScore={gameState.highScore}
+          starsGained={gameState.lastRunStars}
+          onRestart={startGame}
+          onMenu={() => setGameState(prev => ({ ...prev, status: GameStatus.START }))}
+        />
       )}
     </div>
   );
