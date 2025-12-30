@@ -5,9 +5,10 @@ interface GameOverProps {
   highScore: number;
   starsGained: number;
   onRestart: () => void;
+  onMenu: () => void;
 }
 
-const GameOver: React.FC<GameOverProps> = ({ score, highScore, starsGained, onRestart }) => {
+const GameOver: React.FC<GameOverProps> = ({ score, highScore, starsGained, onRestart, onMenu }) => {
   const isNewRecord = score >= highScore && score > 0;
   // Replace with actual URL when deployed
   const shareText = `I scored ${score} points in Phase Shift! Can you beat my high score of ${highScore}? #PhaseShift #WebGame`;
@@ -49,6 +50,16 @@ const GameOver: React.FC<GameOverProps> = ({ score, highScore, starsGained, onRe
           className="w-full px-8 md:px-12 py-4 border-2 border-[#ff8c00] text-[#ff8c00] font-orbitron font-black text-lg md:text-xl hover:bg-[#ff8c00] hover:text-black transition-all duration-300 transform hover:scale-105 active:scale-95 uppercase tracking-widest"
         >
           Re-Initialize
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onMenu();
+          }}
+          className="w-full py-3 border-2 border-white/30 text-white font-orbitron font-bold text-sm tracking-widest hover:border-white hover:bg-white/10 transition-all uppercase"
+        >
+          Main Menu
         </button>
 
         <div className="flex gap-4 w-full justify-center">
