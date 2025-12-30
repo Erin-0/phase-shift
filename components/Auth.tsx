@@ -62,6 +62,21 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         }
     };
 
+    const mapAuthError = (code: string) => {
+        switch (code) {
+            case 'auth/email-already-in-use': return 'هذا البريد الإلكتروني مستخدم بالفعل.';
+            case 'auth/invalid-email': return 'البريد الإلكتروني غير صحيح.';
+            case 'auth/operation-not-allowed': return 'هذه العملية غير مسموح بها حالياً.';
+            case 'auth/weak-password': return 'كلمة المرور ضعيفة جداً.';
+            case 'auth/user-disabled': return 'تم تعطيل هذا الحساب.';
+            case 'auth/user-not-found': return 'لا يوجد حساب بهذا البريد.';
+            case 'auth/wrong-password': return 'كلمة المرور غير صحيحة.';
+            case 'auth/invalid-credential': return 'بيانات الدخول غير صحيحة.';
+            case 'auth/too-many-requests': return 'محاولات كثيرة جداً. حاول لاحقاً.';
+            default: return 'حدث خطأ غير متوقع. حاول مرة أخرى.';
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -73,6 +88,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 userAuth = userCredential.user;
             } else {
+                if (!username.trim()) throw new Error('رجاء إدخال اسم المستخدم');
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 userAuth = userCredential.user;
                 await updateProfile(userAuth, { displayName: username });
@@ -86,12 +102,10 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
             if (docSnap.exists()) {
                 userData = docSnap.data() as UserProfile;
-                // Merge allowed local data if needed, for now just use remote
             } else {
-                // New Profile
                 const initialData: UserProfile = {
                     uid: userAuth.uid,
-                    username: username || userAuth.displayName || 'Rogue User',
+                    username: username || userAuth.displayName || 'Operator',
                     email: userAuth.email || '',
                     photoBase64: photoBase64 || undefined,
                     highScore: 0,
@@ -102,7 +116,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     lastLogin: new Date().toISOString()
                 };
 
-                // Check local storage for migration
                 const localScore = parseInt(localStorage.getItem('ps-highscore') || '0');
                 const localStars = parseInt(localStorage.getItem('ps-stars') || '0');
                 if (localScore > 0) {
@@ -113,8 +126,6 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 await setDoc(docRef, initialData);
                 userData = initialData;
 
-                // Clear local storage to avoid confusion? Or keep as backup. 
-                // Let's clear to ensure we rely on cloud.
                 localStorage.removeItem('ps-highscore');
                 localStorage.removeItem('ps-stars');
             }
@@ -122,7 +133,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             onLogin(userData);
 
         } catch (err: any) {
-            setError(err.message);
+            setError(mapAuthError(err.code) || err.message);
         } finally {
             setLoading(false);
         }
